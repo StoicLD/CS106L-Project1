@@ -6,16 +6,21 @@ CONFIG += c++1z console
 CONFIG -= app_bundle
 
 SOURCES += $$PWD/src/*.cpp
-SOURCES += $$PWD/src/*.h
-HEADERS += $$PWD/src/*.h
+SOURCES += $$PWD/src/SimpleGraph.cpp
+
+SOURCES += $$PWD/src/SimpleGraph.h
+HEADERS += $$PWD/src/SimpleGraph.h
+# SOURCES += $$PWD/src/*.h
+# HEADERS += $$PWD/src/*.h
 
 # set up flags for the compiler and Stanford C++ libraries
-QMAKE_CXXFLAGS += -std=c++1z \
-    -Wall \
-    -Wextra \
-    -Wreturn-type \
-    -Werror=return-type \
-    -Wunreachable-code \
+QMAKE_CXXFLAGS += -std=c++14 \
+     -W4
+#    -Wall \
+#    -Wextra \
+#    -Wreturn-type \
+#    -Werror=return-type \
+#    -Wunreachable-code \
 
 # Copies the given files to the destination directory
 # The rest of this file defines how to copy the resources folder
