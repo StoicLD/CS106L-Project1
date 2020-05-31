@@ -5,15 +5,19 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <ctime>
 #include <filesystem>
 #include "SimpleGraph.h"
 
 using namespace std;
 
 const double kPi = 3.14159265358979323;
+const double kRepel = 10e-3;
+const double kAtract = 10e-3;
 
 void Welcome();
 void initPosition(SimpleGraph& graph);
+void UpdateOnceAlgorithm(SimpleGraph& graph);
 /**
  * 输出文件目录
  * 用户输入文件名字
@@ -64,7 +68,22 @@ int main() {
             graph.nodes = vector<Node>(numOfNodes);
             // (4) initialize the position of nodes
             initPosition(graph);
+            InitGraphVisualizer(graph);
+
             DrawGraph(graph);
+            //vector<Node> netForces(graph.nodes.size());
+            time_t startTime = time(NULL);
+
+            while (true)
+            {
+                //                if(difftime(time(NULL), startTime) > 0.01)
+                //                {
+                startTime = time(NULL);
+                UpdateOnceAlgorithm(graph);
+                DrawGraph(graph);
+                //}
+            }
+
             cout << "Please input the seconds you want the algorithm to run" << endl;
             double seconds = 5.0;
 
@@ -98,6 +117,67 @@ void initPosition(SimpleGraph& graph)
     }
 }
 
+/**
+ * @brief 更新一次
+ * @param graph 需要更新的图
+ * @param netForces 当前合力
+ */
+void UpdateOnceAlgorithm(SimpleGraph& graph)
+{
+    // 必须maintain一个Δx和Δy的当前合力vector
+    // 每次更新的时候用会更新当前的合力，然后移动一个合力的大小距离
+    // (1) O(N2)的两层for循环，计算每个点的排斥力
+    // (2) 遍历Edge计算吸引力
+    // (3) 更新位置
+    vector<Node> netForces(graph.nodes.size());
+
+    auto numOfNodes = graph.nodes.size();
+    auto numOfEdges = graph.edges.size();
+    for(decltype (numOfNodes) i = 0; i < numOfNodes; i++)
+    {
+        Node& node1 = graph.nodes[i];
+
+        for(decltype (numOfNodes) j = i + 1; j < numOfNodes; j++)
+        {
+            Node& node2 = graph.nodes[j];
+            // 同时更新两个节点
+            double beSqrt = sqrt((node1.x - node2.x) * (node1.x - node2.x) + (node1.y - node2.y) * (node1.y - node2.y));
+            double repelForce = kRepel;
+            if(beSqrt != 0.0)
+                repelForce = kRepel / beSqrt;
+            //相当于以node1为原点
+            double theta = atan2(node2.y - node1.y, node2.x - node1.x);
+            netForces[i].x -= repelForce * cos(theta);
+            netForces[i].y -= repelForce * sin(theta);
+            netForces[j].x += repelForce * cos(theta);
+            netForces[j].y += repelForce * sin(theta);
+        }
+    }
+
+    for(decltype (numOfEdges) i = 0; i < numOfEdges; i++)
+    {
+        auto nIndex1 = graph.edges[i].start;
+        auto nIndex2 = graph.edges[i].end;
+
+        Node& node1 = graph.nodes[nIndex1];
+        Node& node2 = graph.nodes[nIndex2];
+        double beSqrt = sqrt((node1.x - node2.x) * (node1.x - node2.x) + (node1.y - node2.y) * (node1.y - node2.y));
+
+        double atractForce = kAtract * beSqrt;
+        double theta = atan2(node2.y - node1.y, node2.x - node1.x);
+        netForces[nIndex1].x += atractForce * cos(theta);
+        netForces[nIndex1].y += atractForce * sin(theta);
+        netForces[nIndex2].x -= atractForce * cos(theta);
+        netForces[nIndex2].y -= atractForce * sin(theta);
+    }
+
+    for(decltype (numOfNodes) i = 0; i < numOfNodes; i++)
+    {
+        graph.nodes[i].x += netForces[i].x;
+        graph.nodes[i].y += netForces[i].y;
+    }
+
+}
 
 
 /* Prints a message to the console welcoming the user and
