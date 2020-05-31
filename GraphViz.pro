@@ -14,8 +14,8 @@ HEADERS += $$PWD/src/SimpleGraph.h
 # HEADERS += $$PWD/src/*.h
 
 # set up flags for the compiler and Stanford C++ libraries
-QMAKE_CXXFLAGS += -std=c++14 \
-     -W4
+#QMAKE_CXXFLAGS += -std=c++14 \
+#     -W4
 #    -Wall \
 #    -Wextra \
 #    -Wreturn-type \

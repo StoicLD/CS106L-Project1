@@ -35,6 +35,8 @@ struct Node {
  */
 struct Edge {
   std::size_t start, end;
+public:
+  Edge(size_t _s, size_t _e) : start(_s), end(_e){}
 };
 
 /**
@@ -71,7 +73,7 @@ void InitGraphVisualizer(SimpleGraph& userGraph);
 /** Real SimpleGraph that uses Q_OBJECT Macro */
 class SimpleGraph : public QObject {
   Q_OBJECT
-
+//Notice that the Q_OBJECT macro is mandatory for any object that implements signals, slots or properties.
   public:
     SimpleGraph(){}
     SimpleGraph(const SimpleGraph& other):QObject(), nodes(other.nodes), edges(other.edges){}
